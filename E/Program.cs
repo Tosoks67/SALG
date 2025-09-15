@@ -96,7 +96,7 @@ namespace SALG
                     data[3] = Total Time
                     data[4] = Quota */
             RankStringToEnum(data[1].Replace(' ', '_'), out Rank rank);
-            if (rank == Rank.None || !int.TryParse(data[2], out int _) || !int.TryParse(data[3], out int _) || !int.TryParse(data[4], out int _) || data.Length > 5)
+            if (data.Length < 5 || rank == Rank.None || !int.TryParse(data[2], out int _) || !int.TryParse(data[3], out int _) || !int.TryParse(data[4], out int _) || data.Length > 5)
             {
                 File.Delete("data");
                 Console.Clear();

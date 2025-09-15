@@ -114,7 +114,7 @@ namespace SALG
 
         static void WriteData(string username, string currentRank, string quotaDone, string totalTimeServed, string requiredQuota)
         {
-            username = (username == "") ? "JohnDoe" : username;
+            username = (username == "") ? "John Doe" : username;
             currentRank = (currentRank == "") ? "Cadet" : currentRank;
             quotaDone = (quotaDone == "") ? "0" : quotaDone;
             totalTimeServed = (totalTimeServed == "") ? "0" : totalTimeServed;

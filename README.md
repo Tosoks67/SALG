@@ -18,6 +18,7 @@ Upon the first launch of the application *(Or if it has been fired from the Main
   4. Your Total Time,
   5. The Current Quota
   6. Permament Note
+  7. Whether you want your Quota Done shown *(So you NCO+ can hide your quota from those pesky EP)*
 
 *After that, an extensionless file called "data" and "notes" **(If Permament Note was specified)** will be created.*
 

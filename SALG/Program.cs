@@ -33,6 +33,13 @@ namespace SALG
             ADoS = Rank.Assistant_Director_of_Security
         }
 
+        enum CWriteMessageType
+        {
+            Stupid,
+            System,
+            MainMenu
+        }
+
         static bool RankStringToEnum(string value, out Rank result, Rank fallback = Rank.None)
         {
             if (Enum.TryParse(value, true, out Rank directRank))
@@ -51,40 +58,42 @@ namespace SALG
             return false;
         }
 
+        static string CWrite(string input, bool newline = false, string mType = "System", bool read = false)
+        {
+            Enum.TryParse(mType, true, out CWriteMessageType mTypeEnum);
+            Console.ForegroundColor = (mTypeEnum == CWriteMessageType.System) ? ConsoleColor.Green : (mTypeEnum == CWriteMessageType.MainMenu) ? ConsoleColor.Cyan : ConsoleColor.Red;
+            input = (newline) ? "\n" + input : input;
+            Console.Write(input);
+            if (read)
+            {
+                Console.Write('\n');
+                Console.ForegroundColor = (mTypeEnum == CWriteMessageType.System) ? ConsoleColor.Magenta : ConsoleColor.Yellow;
+                return Console.ReadLine() ?? "";
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         static void Setup()
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("What's your Roblox username?");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string user = Console.ReadLine() ?? "";
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("What's your current rank? (Skip the \"Security\" part, it will be added automatically)");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string rank = Console.ReadLine() ?? "";
+            Console.Clear();
+            string user = CWrite("What's your Roblox username?", false, "System", true);
+            string rank = CWrite("What's your current rank? (Skip the \"Security\" part, it will be added automatically)", true, "System", true);
             rank = rank.Replace(' ', '_');
             RankStringToEnum(rank, out Rank rankParsed, Rank.Cadet);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("How many minutes of quota have you already done?");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string quota = Console.ReadLine() ?? "";
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("How many minutes of total time do you have?");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string totalTime = Console.ReadLine() ?? "";
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("What is the current quota?");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string reqQuota = Console.ReadLine() ?? "";
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Do you wish to have a note added automatically?\n(If you skip you will be asked each time you generate a log)");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            string notes = Console.ReadLine() ?? "";
+            string quota = CWrite("How many minutes of quota have you already done?", true, "System", true);
+            string totalTime = CWrite("How many minutes of total time do you have?", true, "System", true);
+            string reqQuota = CWrite("What is the current quota?", true, "System", true);
+            string notes = CWrite("Do you wish to have a note added automatically?\n(If you skip you will be asked each time you generate a log)", true, "System", true);
+            string showQDone = CWrite("Do you wish to have your Quota Done shown on the log? (Y/N)", true, "System", true);
             if (notes == "") { File.Delete("notes"); } else { File.WriteAllText("notes", notes); }
 
-            WriteData(user, rankParsed.ToString().Replace('_', ' '), quota, totalTime, reqQuota);
+            WriteData(user, rankParsed.ToString().Replace('_', ' '), quota, totalTime, reqQuota, showQDone);
 
             Console.Clear();
-            Console.ForegroundColor= ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Yellow;
         }
 
         static void CheckUp(string[] data)
@@ -94,9 +103,10 @@ namespace SALG
                     data[1] = Rank
                     data[2] = Quota Done
                     data[3] = Total Time
-                    data[4] = Quota */
+                    data[4] = Quota
+                    data[5] = Show Quota Done */
             RankStringToEnum(data[1].Replace(' ', '_'), out Rank rank);
-            if (data.Length < 5 || rank == Rank.None || !int.TryParse(data[2], out int _) || !int.TryParse(data[3], out int _) || !int.TryParse(data[4], out int _) || data.Length > 5)
+            if (data.Length < 6 || rank == Rank.None || !int.TryParse(data[2], out int _) || !int.TryParse(data[3], out int _) || !int.TryParse(data[4], out int _) || (data[5].ToUpper() != "Y" && data[5].ToUpper() != "N") || data.Length > 6)
             {
                 File.Delete("data");
                 Console.Clear();
@@ -112,24 +122,24 @@ namespace SALG
             return data;
         }
 
-        static void WriteData(string username, string currentRank, string quotaDone, string totalTimeServed, string requiredQuota)
+        static void WriteData(string username, string currentRank, string quotaDone, string totalTimeServed, string requiredQuota, string showQuotaDone)
         {
             username = (username == "") ? "John Doe" : username;
             currentRank = (currentRank == "") ? "Cadet" : currentRank;
             quotaDone = (quotaDone == "") ? "0" : quotaDone;
             totalTimeServed = (totalTimeServed == "") ? "0" : totalTimeServed;
             requiredQuota = (requiredQuota == "") ? "120" : requiredQuota;
-            File.WriteAllText("data", username + "|" + currentRank + "|" + quotaDone + "|" + totalTimeServed + "|" + requiredQuota);
+            showQuotaDone = (showQuotaDone == "" || (showQuotaDone.ToUpper() != "Y" && showQuotaDone.ToUpper() != "N")) ? "Y" : showQuotaDone;
+            File.WriteAllText("data", username + "|" + currentRank + "|" + quotaDone + "|" + totalTimeServed + "|" + requiredQuota + "|" + showQuotaDone);
         }
 
         static void Instructions(string[] data)
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Clear();
             RankStringToEnum(data[1].Replace(' ', '_'), out Rank rank);
             string extra = (rank == Rank.Assistant_Director_of_Security || rank == Rank.None) ? "" : "Security ";
-            Console.WriteLine("You username is: " + data[0] + ".\nYour rank is: " + extra + rank.ToString().Replace('_',' ') + ".\nYou have done " + data[2] + " minutes of quota out of the required " + data[4] + ".\nYour total time served is: " + data[3] + " minutes.\n");
-            Console.WriteLine("What do you wish to do?:\n    1. Run Setup again\n    2. Reset the quota\n    3. Clear the console\n    4. View permament note(s)\n    5. Generate an activity log");
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            CWrite("You username is: " + data[0] + ".\nYour rank is: " + extra + rank.ToString().Replace('_', ' ') + ".\nYou have done " + data[2] + " minutes of quota out of the required " + data[4] + ".\nYour total time served is: " + data[3] + " minutes.\nQuota shown?: " + data[5] + "\n", false, "MainMenu");
+            CWrite("What do you wish to do?:\n    1. Run Setup again\n    2. Reset the quota\n    3. Clear the console\n    4. View permament note(s)\n    5. Generate an activity log", true, "MainMenu");
         }
 
         static void Main(string[] args)
@@ -146,7 +156,7 @@ namespace SALG
             while (true)
             {
                 CheckUp(data);
-                string method = Console.ReadLine() ?? "";
+                string method = CWrite("", false, "MainMenu", true);
                 if (!File.Exists("data"))
                 {
                     Setup();
@@ -161,59 +171,41 @@ namespace SALG
                         Instructions(data);
                         break;
                     case "2":
-                        WriteData(data[0], data[1], "0", data[3], data[4]);
-                        Console.Clear();
+                        WriteData(data[0], data[1], "0", data[3], data[4], data[5]);
                         data = ReadData();
                         Instructions(data);
                         break;
                     case "3":
-                        Console.Clear();
                         Instructions(data);
                         break;
                     case "4":
                         Console.Clear();
-                        Console.ForegroundColor= ConsoleColor.Cyan;
-                        Console.WriteLine("Your permament note(s):\n");
-                        Console.ForegroundColor = ConsoleColor.Green;
+                        CWrite("Your permament note(s):\n", false, "MainMenu");
                         if (File.Exists("notes"))
                         {
-                            Console.WriteLine(File.ReadAllText("notes"));
+                            CWrite(File.ReadAllText("notes"), true);
                         }
                         else
                         {
-                            Console.WriteLine("You have no permament notes.");
+                            CWrite("You have no permament notes.", true, "MainMenu");
                         }
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine("\nPress any key to continue");
-                        Console.ReadLine();
-                        Console.Clear();
+                        CWrite("\nPress any key to continue", true, "MainMenu", true);
                         Instructions(data);
                         break;
                     case "5":
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("Start time? (Add 1 hour if affected by Daylight Savings):");
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        string start = Console.ReadLine() ?? "0:00";
+                        string start = CWrite("Start time? (Add 1 hour if affected by Daylight Savings):", false, "System", true);
                         start = (start == "") ? "0:00" : start;
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("End time?:");
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        string end = Console.ReadLine() ?? "0:01";
+                        string end = CWrite("End time?:", false, "System", true);
                         end = (end == "") ? "0:01" : end;
                         string note = "";
-                        Console.ForegroundColor = ConsoleColor.Green;
                         if (!File.Exists("notes"))
                         {
-                            Console.WriteLine("Note? (Skip if none):");
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            note = Console.ReadLine() ?? "";
+                            note = CWrite("Note? (Skip if none):", false, "System", true);
                         }
                         else
                         {
                             note = File.ReadAllText("notes");
-                            Console.WriteLine("Add Note to Permament Note? (Skip if none):");
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            note = ((Console.ReadLine() ?? "") != "") ? note + " " + (Console.ReadLine() ?? "") : note;
+                            note = (CWrite("Add Note to Permament Note? (Skip if none):", false, "System", true) != "") ? note + " " + CWrite("Add Note to Permament Note? (Skip if none):", false, "System", true) : note;
                         }
                         note = (note != "") ? "\r\n**Note(s): **" + note : "";
 
@@ -233,7 +225,7 @@ namespace SALG
                         TimeSpan startTime = new TimeSpan(startHour, startMinute, 0);
                         TimeSpan endTime = new TimeSpan(endHour, endMinute, 0);
 
-                        if(endTime < startTime)
+                        if (endTime < startTime)
                         {
                             endTime = endTime.Add(TimeSpan.FromDays(1));
                         }
@@ -245,28 +237,26 @@ namespace SALG
 
                         int qDone = Convert.ToInt32(data[2]) + difference;
                         int tTime = Convert.ToInt32(data[3]) + difference;
+                        string qShown = (data[5].ToUpper() == "Y") ? "\r\n-# Quota: " + qDone + " / " + data[4] : "";
                         Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.WriteLine("**Username: **" + data[0] + "\r\n**Rank: **Security " + data[1] + "\r\n**Start Time: **" + start + "\r\n**End time: **" + end + "\r\n**Total time on-site: **" + difference + " minutes\r\n**Total time: **" + tTime + " minutes\r\n-# Quota: " + qDone + " / " + data[4] + "\r\n__**Evidence: **__" + note);
-                        WriteData(data[0], data[1], Convert.ToString(qDone), Convert.ToString(tTime), data[4]);
-                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("**Username: **" + data[0] + "\r\n**Rank: **Security " + data[1] + "\r\n**Start Time: **" + start + "\r\n**End time: **" + end + "\r\n**Total time on-site: **" + difference + " minutes\r\n**Total time: **" + tTime + " minutes" + qShown + "\r\n__**Evidence: **__" + note);
+                        WriteData(data[0], data[1], Convert.ToString(qDone), Convert.ToString(tTime), data[4], data[5]);
                         break;
                     default:
                         random = new Random();
                         int randomAnswer = random.Next(3);
-                        Console.ForegroundColor = ConsoleColor.Red;
                         switch (randomAnswer)
                         {
                             case 0:
-                                Console.WriteLine("Is it that hard to choose a number between 1 and 5?");
+                                CWrite("Is it that hard to choose a number between 1 and 5?", false, " ");
                                 break;
                             case 1:
-                                Console.WriteLine("Are you fricking serious right now.");
+                                CWrite("Are you fricking serious right now.", false, " ");
                                 break;
                             case 2:
-                                Console.WriteLine("Do better, please.");
+                                CWrite("Do better, please.", false, " ");
                                 break;
                         }
-                        Console.ForegroundColor = ConsoleColor.Yellow;
                         break;
                 }
             }

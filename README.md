@@ -4,6 +4,7 @@ is a tool for all my fellow **DoS officers** which includes the following:
   - Total Time on-site calculator, ***(You still have to add that 1 hour if affected by DS)***
   - Permament Notes, *(Notes that appear every time you make a log)*
   - Activity Log Generator, *(Kind of the main thing)*
+  - ~~Quota Hiding~~ ***(YET TO BE RELEASED)***
 
 ## Usage
 
@@ -48,7 +49,7 @@ You will only be asked for a **Start Time**, an **End Time** and some additional
 After that, the app does the rest ***(And you can finally paste that log onto the discord)***.
 
 
-
+If your `Quota shown` is set to`Y`, SALG will just add `-# Quota: {Quota Done} / {Quota}` before the `Evidence` part.
 
 
 

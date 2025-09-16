@@ -51,6 +51,8 @@ After that, the app does the rest ***(And you can finally paste that log onto th
 
 If your `Quota shown` is set to`Y`, SALG will just add `-# Quota: {Quota Done} / {Quota}` before the `Evidence` part.
 
+*(I highly recommend to keep this on `Y` to save HR some time **[Unless you're NCO+ that is]**)*
+
 
 
 ## Contact

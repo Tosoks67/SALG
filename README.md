@@ -4,7 +4,8 @@ is a tool for all my fellow **DoS officers** which includes the following:
   - Total Time on-site calculator, ***(You still have to add that 1 hour if affected by DS)***
   - Permament Notes, *(Notes that appear every time you make a log)*
   - Activity Log Generator, *(Kind of the main thing)*
-  - ~~Quota Hiding~~ ***(YET TO BE RELEASED)***
+  - Quota Hiding
+  - Skip-to-keep *(Skip whilst doing Setup again to keep a value the way it was)* 
 
 ## Usage
 
